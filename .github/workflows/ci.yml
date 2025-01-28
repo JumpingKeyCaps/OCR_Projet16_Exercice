@@ -26,24 +26,19 @@ jobs:
       - name: Setup Android SDK
         uses: android-actions/setup-android@v2
 
-      # Step 4 : Installer les dépendances de l'émulateur Android
-      - name: Install Android Emulator dependencies
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y qemu-kvm libvirt-bin ubuntu-vm-builder bridge-utils
 
-      # Step 5 : Donner la permission d'a Gradle sur linux
+      # Step 4 : Donner la permission d'a Gradle sur linux
       - name: Give execute permission to gradlew
         run: chmod +x ./gradlew
 
 
-      # Step 6 : Reconstruire le fichier keystore à partir du secret
+      # Step 5 : Reconstruire le fichier keystore à partir du secret
       - name: Decode keystore file
         run: |
           echo "${{ secrets.KEYSTORE_FILE_BASE64 }}" | base64 -d > app/arista-keystore.jks
           ls -la app/ # Vérification que le fichier a bien été généré
 
-      # Step 7 : Créer l'AVD et démarrer l'émulateur Android
+      # Step 6 : Créer l'AVD et démarrer l'émulateur Android
       - name: Start Android Emulator
         uses: reactivecircus/android-emulator-runner@v2
         with:
