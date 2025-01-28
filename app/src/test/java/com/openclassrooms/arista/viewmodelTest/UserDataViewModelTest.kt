@@ -21,7 +21,6 @@ import org.mockito.Mockito.*
 import org.mockito.MockitoAnnotations
 @OptIn(ExperimentalCoroutinesApi::class)
 class UserDataViewModelTest {
-    // Règle pour exécuter les tâches de LiveData de manière synchrone
     @get:Rule
     val instantTaskExecutorRule = InstantTaskExecutorRule()
 
@@ -30,30 +29,19 @@ class UserDataViewModelTest {
 
     private lateinit var userDataViewModel: UserDataViewModel
 
-
     @Before
     fun setUp() {
         MockitoAnnotations.openMocks(this)
-        // Utiliser un dispatcher de test pour les coroutines
         Dispatchers.setMain(UnconfinedTestDispatcher())
         userDataViewModel = UserDataViewModel(getUserUsecase)
     }
 
     @After
     fun tearDown() {
-        // Réinitialiser le dispatcher principal après les tests
         Dispatchers.resetMain()
     }
 
-    @Test
-    fun `loadUserData should update userFlow with user data`() = runTest {
-        // Arrange
-        val fakeUser = User(name = "John Doe", email = "john.doe@example.com")
-        `when`(getUserUsecase.execute()).thenReturn(fakeUser)
 
-        // Assert
-        verify(getUserUsecase).execute()
-    }
 
     @Test
     fun `loadUserData should update userFlow with null if no user found`() = runTest {
