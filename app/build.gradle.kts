@@ -12,7 +12,6 @@ plugins {
 }
 
 /**
-
 sonar {
     properties {
         property("sonar.projectKey", "JumpingKeyCaps_OCR_Projet16_Exercice")
@@ -22,9 +21,7 @@ sonar {
         property("sonar.sources", "src/main")
         property("sonar.tests", "src/test")
         property("sonar.java.binaries", "${project.buildDir}/intermediates/classes/debug")
-
         property("sonar.coverage.jacoco.xmlReportPaths", "${buildDir}/reports/jacoco/jacocoTestReport/jacocoTestReport.xml")
-
     }
 }
 
