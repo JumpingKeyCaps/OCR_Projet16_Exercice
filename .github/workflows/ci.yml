@@ -11,33 +11,50 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+      # Step 1 : Checkout du code source
       - name: Checkout code
         uses: actions/checkout@v3
 
+      # Step 2 : Configuration de JDK 17
       - name: Setup JDK
         uses: actions/setup-java@v3
         with:
           java-version: 17
           distribution: temurin
 
+      # Step 3 : Configuration du SDK Android
       - name: Setup Android SDK
         uses: android-actions/setup-android@v2
 
+      # Step 4 : Donner la permission d'a Gradle sur linux
       - name: Give execute permission to gradlew
         run: chmod +x ./gradlew
 
+
+      # Step 5 : Reconstruire le fichier keystore à partir du secret
+      - name: Decode keystore file
+        run: echo ${{ secrets.KEYSTORE_FILE_BASE64 }} | base64 -d > arista-keystore.jks
+
+      # Step 6 : Construire le projet en incluant la signature
       - name: Clean and Build
         run: |
-          ./gradlew clean build
+          ./gradlew clean assembleRelease
+        env:
+           KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
+           KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
+           KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
 
+      # Step 7 : Lancer les tests unitaires
       - name: Test
         run: |
           ./gradlew test
 
+      # Step 8 : Générer le rapport Jacoco
       - name: JacocoReport
         run: |
           ./gradlew jacocoTestReport
 
+      # Step 9 : Analyse SonarCloud
       - name: Run SonarCloud Analysis
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
@@ -48,6 +65,7 @@ jobs:
             -Dsonar.host.url=https://sonarcloud.io \
             -Dsonar.coverage.jacoco.xmlReportPaths=app/build/reports/jacoco/jacocoTestReport/jacocoTestReport.xml
 
+      # Step 10 : Validation PR en cas d'échec
       - name: Validate PR
         if: ${{ failure() }}
         run: echo "Build ou analyse de qualité échouée, PR bloquée."
