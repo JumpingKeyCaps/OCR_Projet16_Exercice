@@ -27,17 +27,39 @@ sonar {
 
 */
 //Signature app
-val keystorePropertiesFile = rootProject.file("keystore.properties")
-val keystoreProperties = Properties()
-keystoreProperties.load(FileInputStream(keystorePropertiesFile))
+val useGithubSecrets = System.getenv("CI") == "true" // Si on détecte un environnement CI
+
+val keystoreProperties: Properties? = if (!useGithubSecrets) {
+    val keystorePropertiesFile = rootProject.file("keystore.properties")
+    if (keystorePropertiesFile.exists()) {
+        Properties().apply {
+            load(FileInputStream(keystorePropertiesFile))
+        }
+    } else {
+        null
+    }
+} else {
+    null
+}
 
 android {
     signingConfigs {
         create("release") {
-            storeFile = file(keystoreProperties["storeFile"] as String)
-            storePassword = keystoreProperties["storePassword"] as String
-            keyAlias = keystoreProperties["keyAlias"] as String
-            keyPassword = keystoreProperties["keyPassword"] as String
+            if (useGithubSecrets) {
+                // Configuration pour GitHub Actions avec les secrets
+                storeFile = file("arista-keystore.jks") // Généré à partir de KEYSTORE_FILE_BASE64
+                storePassword = System.getenv("KEYSTORE_PASSWORD")
+                keyAlias = System.getenv("KEY_ALIAS")
+                keyPassword = System.getenv("KEY_PASSWORD")
+            } else {
+                // Configuration locale avec keystore.properties
+                if (keystoreProperties != null) {
+                    storeFile = file(keystoreProperties["storeFile"] as String)
+                    storePassword = keystoreProperties["storePassword"] as String
+                    keyAlias = keystoreProperties["keyAlias"] as String
+                    keyPassword = keystoreProperties["keyPassword"] as String
+                }
+            }
         }
     }
     namespace = "com.openclassrooms.arista"
