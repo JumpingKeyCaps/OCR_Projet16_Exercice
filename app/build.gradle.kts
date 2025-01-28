@@ -1,5 +1,6 @@
 import com.android.build.gradle.BaseExtension
 import java.io.FileInputStream
+import java.io.FileNotFoundException
 import java.util.Properties
 
 plugins {
@@ -46,8 +47,15 @@ android {
     signingConfigs {
         create("release") {
             if (useGithubSecrets) {
+
                 // Configuration pour GitHub Actions avec les secrets
-                storeFile = file("arista-keystore.jks") // Généré à partir de KEYSTORE_FILE_BASE64
+                val keystorePath = rootProject.file("app/arista-keystore.jks") // Assure que le fichier est généré ici
+                if (!keystorePath.exists()) {
+                    throw FileNotFoundException("Le fichier de keystore n'a pas été trouvé dans le chemin : ${keystorePath.absolutePath}")
+                }
+
+                // Configuration pour GitHub Actions avec les secrets
+                storeFile = keystorePath
                 storePassword = System.getenv("KEYSTORE_PASSWORD")
                 keyAlias = System.getenv("KEY_ALIAS")
                 keyPassword = System.getenv("KEY_PASSWORD")
