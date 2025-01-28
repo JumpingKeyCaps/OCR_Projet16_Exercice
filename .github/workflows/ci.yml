@@ -23,6 +23,9 @@ jobs:
       - name: Setup Android SDK
         uses: android-actions/setup-android@v2
 
+      - name: Give execute permission to gradlew
+        run: chmod +x ./gradlew
+
       - name: Clean and Build
         run: |
           ./gradlew clean build
