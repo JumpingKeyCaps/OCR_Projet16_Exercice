@@ -61,7 +61,7 @@ jobs:
           cores: 2
           avd-name: test
           emulator-boot-timeout: 1200
-          emulator-port: 5556
+          emulator-port: 5554
           emulator-options: -no-window -gpu swiftshader_indirect -no-snapshot -noaudio -no-boot-anim
           disable-animations: true
           disable-spellchecker: false
