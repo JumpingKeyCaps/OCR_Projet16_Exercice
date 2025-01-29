@@ -60,23 +60,27 @@ jobs:
       - name: Delete existing AVD (if any)
         run: avdmanager delete avd -n test || true
 
-      - name: Create AVD
-        run: |
-          echo "y" | $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager --install "system-images;android-30;google_apis;x86_64"
-          echo "no" | $ANDROID_HOME/cmdline-tools/latest/bin/avdmanager create avd -n test -k "system-images;android-30;google_apis;x86_64" --device "pixel_4" || true
+    #  - name: Create AVD
+    #    run: |
+    #      echo "y" | $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager --install "system-images;android-30;google_apis;x86_64"
+    #      echo "no" | $ANDROID_HOME/cmdline-tools/latest/bin/avdmanager create avd -n test -k "system-images;android-30;google_apis;x86_64" --device "pixel_4" || true
 
-      - name: Start Emulator
-        run: |
-          nohup $ANDROID_HOME/emulator/emulator -avd test -no-window -gpu swiftshader_indirect -no-audio -no-boot-anim -accel off -no-metrics > /dev/null 2>&1 &
+    #  - name: Start Emulator
+    #    run: |
+    #      nohup $ANDROID_HOME/emulator/emulator -avd test -no-window -gpu swiftshader_indirect -no-audio -no-boot-anim -accel off -no-metrics > /dev/null 2>&1 &
          
           
 
-        #   - name: Create AVD
-        #       run: |
-        #      echo "no" | avdmanager create avd -n test -k "system-images;android-30;google_apis;x86_64"
+      - name: Create AVD
+        run: |
+            echo "no" | avdmanager create avd -n test -k "system-images;android-30;google_apis;x86_64"
 
-      #   - name: Start emulator
-      #      run: emulator -avd test -no-window -gpu angle &
+      - name: Start emulator
+        run: emulator -avd test -no-window -gpu angle &
+
+
+
+
 
       # Step  : Star emu and wait device
       - name:  wait for device
