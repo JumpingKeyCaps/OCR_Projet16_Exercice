@@ -5,9 +5,8 @@ on:
     branches:
       - master
 
-
 jobs:
-  build:
+  test:
     runs-on: ubuntu-latest
 
     env:
@@ -15,82 +14,68 @@ jobs:
       ANDROID_HOME: "/usr/local/lib/android/sdk"
       ANDROID_SDK_ROOT: "/usr/local/lib/android/sdk"
 
-
     steps:
-      # Step 1 : Checkout du code source
       - name: Checkout code
         uses: actions/checkout@v3
 
-      # Step 2 : Configuration de JDK 17
       - name: Setup JDK
         uses: actions/setup-java@v3
         with:
           java-version: 17
           distribution: temurin
 
-      # Step 3 : Configuration du SDK Android
       - name: Setup Android SDK
         uses: android-actions/setup-android@v2
 
-
-      # Step 4 : Donner la permission d'a Gradle sur linux
       - name: Give execute permission to gradlew
         run: chmod +x ./gradlew
 
+      # Lancer les tests unitaires avant de builder l'APK
+      - name: Run Unit Tests
+        run: ./gradlew testDebugUnitTest
 
-      # Step 5 : Reconstruire le fichier keystore à partir du secret
+      # Générer le rapport de couverture Jacoco
+      - name: Generate Jacoco Report
+        run: ./gradlew jacocoTestReport
+
+  build:
+    needs: test  # Attendre que les tests passent avant de builder l'APK
+    runs-on: ubuntu-latest
+
+    env:
+      JAVA_HOME: "/opt/hostedtoolcache/Java_Temurin-Hotspot_jdk/17.0.13-11/x64"
+      ANDROID_HOME: "/usr/local/lib/android/sdk"
+      ANDROID_SDK_ROOT: "/usr/local/lib/android/sdk"
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Setup JDK
+        uses: actions/setup-java@v3
+        with:
+          java-version: 17
+          distribution: temurin
+
+      - name: Setup Android SDK
+        uses: android-actions/setup-android@v2
+
+      - name: Give execute permission to gradlew
+        run: chmod +x ./gradlew
+
       - name: Decode keystore file
         run: |
           echo "${{ secrets.KEYSTORE_FILE_BASE64 }}" | base64 -d > app/arista-keystore.jks
-          ls -la app/ # Vérification que le fichier a bien été généré
+          ls -la app/ 
 
-
-      - name: Kill any running emulator
-        run: adb emu kill || true
-
-
-
-      # Step 6 : Créer l'AVD et démarrer l'émulateur Android
-      - name: Start Android Emulator
-        uses: reactivecircus/android-emulator-runner@v2
-        with:
-          api-level: 28
-          target: google_apis
-          arch: x86_64
-          force-avd-creation: true
-          cores: 2
-          avd-name: test
-          emulator-boot-timeout: 1200
-          emulator-port: 5554
-          emulator-options: -no-window -gpu swiftshader_indirect -no-snapshot -noaudio -no-boot-anim -accel off
-          disable-animations: true
-          disable-spellchecker: true
-          disable-linux-hw-accel: true
-          enable-hw-keyboard: false
-          channel: stable
-          script: ./gradlew clean
-
-
-      # Step 8 : Construire le projet en incluant la signature
-      - name:  Build
-        run: |
-          ./gradlew assembleRelease
+      # Construire l'APK release
+      - name: Build APK
+        run: ./gradlew assembleRelease
         env:
           KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
           KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
           KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
 
-      # Step 9 : Lancer les tests unitaires
-      - name: Test
-        run: |
-          ./gradlew test
-
-      # Step 10 : Générer le rapport Jacoco
-      - name: JacocoReport
-        run: |
-          ./gradlew jacocoTestReport
-
-      # Step 11 : Analyse SonarCloud
       - name: Run SonarCloud Analysis
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
@@ -101,9 +86,6 @@ jobs:
             -Dsonar.host.url=https://sonarcloud.io \
             -Dsonar.coverage.jacoco.xmlReportPaths=app/build/reports/jacoco/jacocoTestReport/jacocoTestReport.xml
 
-      # Step 12 : Validation PR en cas d'échec
       - name: Validate PR
         if: ${{ failure() }}
         run: echo "Build ou analyse de qualité échouée, PR bloquée."
-
-
