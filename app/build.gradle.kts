@@ -12,6 +12,7 @@ plugins {
     id("org.sonarqube") version "5.1.0.4882"
 }
 
+
 //Signature app
 val useGithubSecrets = System.getenv("CI") == "true" // Si on détecte un environnement CI
 
