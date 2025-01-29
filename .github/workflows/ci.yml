@@ -68,18 +68,11 @@ jobs:
           disable-linux-hw-accel: false
           enable-hw-keyboard: false
           channel: stable
-          script: adb emu start
+          script: ./gradlew clean
 
 
-
-      # Step 8 : Construire le projet en incluant la signature
-      - name:  Build
-        run: |
-          ./gradlew assembleRelease
-        env:
-          KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
-          KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
-          KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
+      - name: Kill any running emulator
+        run: adb emu start
 
       # Step 9 : Lancer les tests unitaires
       - name: Test
@@ -101,6 +94,17 @@ jobs:
             -Dsonar.organization=jumpingKeyCaps \
             -Dsonar.host.url=https://sonarcloud.io \
             -Dsonar.coverage.jacoco.xmlReportPaths=app/build/reports/jacoco/jacocoTestReport/jacocoTestReport.xml
+
+
+      # Step 8 : Construire le projet en incluant la signature
+      - name:  Build
+        run: |
+          ./gradlew assembleRelease
+        env:
+          KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
+          KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
+          KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
+
 
       # Step 12 : Validation PR en cas d'échec
       - name: Validate PR
