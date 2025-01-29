@@ -30,9 +30,7 @@ jobs:
       - name: Setup Android SDK
         uses: android-actions/setup-android@v2
 
-      # Step 4 : Donner la permission d'a Gradle sur Windows
-      - name: Give execute permission to gradlew
-        run: icacls ./gradlew /grant Everyone:(F)
+
 
       # Step 5 : Reconstruire le fichier keystore à partir du secret
       - name: Decode keystore file
@@ -80,6 +78,11 @@ jobs:
       - name: Emulator Debugging
         run: |
           adb logcat -d
+          
+
+       # Step 4 : Donner la permission d'a Gradle sur Windows
+      - name: Give execute permission to gradlew
+        run: icacls ./gradlew /grant Everyone:(F)
 
       # Step 11 : Construire le projet en incluant la signature
       - name: Clean and Build
