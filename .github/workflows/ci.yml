@@ -5,14 +5,16 @@ on:
     branches:
       - master
 
+
 jobs:
   build:
-    runs-on: windows-latest  # Utilisation de l'environnement Windows
+    runs-on: ubuntu-latest
 
     env:
-      JAVA_HOME: "C:\\Program Files\\AdoptOpenJDK\\jdk-17.0.13.11\\hotspot"
-      ANDROID_HOME: "C:\\Users\\runneradmin\\AppData\\Local\\Android\\Sdk"
-      ANDROID_SDK_ROOT: "C:\\Users\\runneradmin\\AppData\\Local\\Android\\Sdk"
+      JAVA_HOME: "/opt/hostedtoolcache/Java_Temurin-Hotspot_jdk/17.0.13-11/x64"
+      ANDROID_HOME: "/usr/local/lib/android/sdk"
+      ANDROID_SDK_ROOT: "/usr/local/lib/android/sdk"
+
 
     steps:
       # Step 1 : Checkout du code source
@@ -31,18 +33,24 @@ jobs:
         uses: android-actions/setup-android@v2
 
 
+      # Step 4 : Donner la permission d'a Gradle sur linux
+      - name: Give execute permission to gradlew
+        run: chmod +x ./gradlew
+
 
       # Step 5 : Reconstruire le fichier keystore à partir du secret
       - name: Decode keystore file
         run: |
           echo "${{ secrets.KEYSTORE_FILE_BASE64 }}" | base64 -d > app/arista-keystore.jks
-          dir app/ # Vérification que le fichier a bien été généré
+          ls -la app/ # Vérification que le fichier a bien été généré
 
-      # Step 6 : Kill any running emulator
+
       - name: Kill any running emulator
         run: adb emu kill || true
 
-      # Step 7 : Créer l'AVD et démarrer l'émulateur Android
+
+
+      # Step 6 : Créer l'AVD et démarrer l'émulateur Android
       - name: Start Android Emulator
         uses: reactivecircus/android-emulator-runner@v2
         with:
@@ -62,59 +70,56 @@ jobs:
           channel: stable
           script: ./gradlew clean
 
-      # Step 8 : Attendre que l'émulateur soit prêt
+        # Step 7 : Attendre que l'émulateur soit prêt
       - name: Wait for Emulator to boot
         run: |
           adb -s emulator-5554 wait-for-device
           adb shell getprop sys.boot_completed
 
-      # Step 9 : Vérifier la connexion ADB
+      # Step 8 : Vérifier la connexion ADB
       - name: Check Emulator ADB Devices
         run: |
           adb devices
           adb -s emulator-5554 shell getprop sys.boot_completed
 
-      # Step 10 : Debugging de l'émulateur
+      # Step 9 : Debugging de l'émulateur
       - name: Emulator Debugging
         run: |
           adb logcat -d
-          
 
-       # Step 4 : Donner la permission d'a Gradle sur Windows
-      - name: Give execute permission to gradlew
-        run: icacls ./gradlew /grant Everyone:(F)
-
-      # Step 11 : Construire le projet en incluant la signature
+      # Step 8 : Construire le projet en incluant la signature
       - name: Clean and Build
         run: |
-          .\\gradlew clean assembleRelease
+          ./gradlew clean assembleRelease
         env:
           KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
           KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
           KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
 
-      # Step 12 : Lancer les tests unitaires
+      # Step 9 : Lancer les tests unitaires
       - name: Test
         run: |
-          .\\gradlew test
+          ./gradlew test
 
-      # Step 13 : Générer le rapport Jacoco
+      # Step 10 : Générer le rapport Jacoco
       - name: JacocoReport
         run: |
-          .\\gradlew jacocoTestReport
+          ./gradlew jacocoTestReport
 
-      # Step 14 : Analyse SonarCloud
+      # Step 11 : Analyse SonarCloud
       - name: Run SonarCloud Analysis
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
         run: |
-          .\\gradlew sonarqube ^
-            -Dsonar.projectKey=JumpingKeyCaps_OCR_Projet16_Exercice ^
-            -Dsonar.organization=jumpingKeyCaps ^
-            -Dsonar.host.url=https://sonarcloud.io ^
-            -Dsonar.coverage.jacoco.xmlReportPaths=app\\build\\reports\\jacoco\\jacocoTestReport\\jacocoTestReport.xml
+          ./gradlew sonarqube \
+            -Dsonar.projectKey=JumpingKeyCaps_OCR_Projet16_Exercice \
+            -Dsonar.organization=jumpingKeyCaps \
+            -Dsonar.host.url=https://sonarcloud.io \
+            -Dsonar.coverage.jacoco.xmlReportPaths=app/build/reports/jacoco/jacocoTestReport/jacocoTestReport.xml
 
-      # Step 15 : Validation PR en cas d'échec
+      # Step 12 : Validation PR en cas d'échec
       - name: Validate PR
         if: ${{ failure() }}
         run: echo "Build ou analyse de qualité échouée, PR bloquée."
+
+
