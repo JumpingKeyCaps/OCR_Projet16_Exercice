@@ -46,7 +46,7 @@ jobs:
 
       # Step 6 : Créer l'AVD et démarrer l'émulateur Android
       - name: Start Android Emulator
-        uses: reactivecircus/android-emulator-runner@v2
+        uses: reactivecircus/android-emulator-runner@v1
         with:
           api-level: 30
           target: google_apis
