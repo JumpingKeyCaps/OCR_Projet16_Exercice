@@ -45,13 +45,25 @@ jobs:
           ls -la app/ # Vérification que le fichier a bien été généré
 
 
+      # kill emu if exist
       - name: Kill any running emulator
-        run: adb emu kill || true
+        run: |
+          adb emu kill || true
+          for i in `seq 1 10`; do
+          if [[ $(adb devices | grep emulator) ]]; then
+           echo "Killing emulator..."
+           adb emu kill
+           sleep 2
+          fi
+          done
+      # Delete AVD if exist
+      - name: Delete existing AVD (if any)
+        run: avdmanager delete avd -n test || true
 
 
 
       # Step  : Créer l'AVD et démarrer l'émulateur Android
-      - name: Start Android Emulator
+      - name: Build Android virtual device (AVD/Emulator)
         uses: reactivecircus/android-emulator-runner@v2
         with:
           api-level: 30
@@ -62,7 +74,7 @@ jobs:
           avd-name: test
           emulator-boot-timeout: 1200
           emulator-port: 5554
-          emulator-options: -no-window -gpu swiftshader_indirect -no-snapshot -noaudio -no-boot-anim -accel off -no-metrics
+          emulator-options: -no-window -gpu angle -no-snapshot -noaudio -no-boot-anim -accel off -no-metrics
           disable-animations: true
           disable-spellchecker: true
           disable-linux-hw-accel: true
@@ -70,15 +82,28 @@ jobs:
           channel: stable
           script: ./gradlew clean
 
-      # Step  : Lancer l'emulateur
-      - name: Start emulator
-        run: adb emu start
+      # Step  : Star emu and wait device
+      - name: Start emulator and wait for device
+        run: |
+          adb emu start &
+          adb wait-for-device
+          adb shell while [[ $(adb shell getprop sys.boot_completed) != 1 ]]; do sleep 1; done
+          adb shell echo "Device is ready"
+          adb devices -l
+
+
+
+      # Step  : Lancer les tests instrumented
+      - name: Run Instrumented Tests
+        run: |
+          sleep 60  
+          ./gradlew connectedDebugAndroidTest
 
       # Step  : Lancer les tests unitaires
       - name: Tests
         run: |
           ./gradlew test
-
+          
 
       # Step  : Générer le rapport Jacoco
       - name: Generate JacocoReport
