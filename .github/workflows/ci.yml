@@ -54,14 +54,18 @@ jobs:
           force-avd-creation: true
           cores: 2
           avd-name: test
-          emulator-boot-timeout: 600
+          emulator-boot-timeout: 1200
           emulator-port: 5554
           emulator-options: -no-window -gpu swiftshader_indirect -no-snapshot -noaudio -no-boot-anim
           disable-animations: true
           disable-spellchecker: false
-          disable-linux-hw-accel: true  # Désactiver l'accélération matérielle
+          disable-linux-hw-accel: true
           enable-hw-keyboard: false
           channel: stable
+
+      # check adb co
+      - name: Check ADB connection
+        run: adb devices
 
 
       # Step 8 : Construire le projet en incluant la signature
