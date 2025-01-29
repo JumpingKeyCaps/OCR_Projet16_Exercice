@@ -38,11 +38,11 @@ jobs:
 
       # Lancer les tests unitaires avant de builder l'APK
       - name: Run Unit Tests
-        run: ./gradlew clean testDebugUnitTest
+        run: ./gradlew test
 
       # Générer le rapport de couverture Jacoco
       - name: Generate Jacoco Report
-        run: ./gradlew jacocoTestReport --info
+        run: ./gradlew jacocoTestReport
 
 
       - name: Run SonarCloud Analysis
