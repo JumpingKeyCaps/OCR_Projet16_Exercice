@@ -38,18 +38,18 @@ jobs:
 
       # Lancer les tests unitaires avant de builder l'APK
       - name: Run Unit Tests
-        run: ./gradlew testDebugUnitTest
+        run: ./gradlew clear testDebugUnitTest
 
       # Générer le rapport de couverture Jacoco
       - name: Generate Jacoco Report
-        run: ./gradlew jacocoTestReport
+        run: ./gradlew jacocoTestReport --info
 
 
       - name: Run SonarCloud Analysis
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
         run: |
-          ./gradlew sonarqube \
+          ./gradlew sonar \
             -Dsonar.projectKey=JumpingKeyCaps_OCR_Projet16_Exercice \
             -Dsonar.organization=jumpingkeycaps \
             -Dsonar.host.url=https://sonarcloud.io \
