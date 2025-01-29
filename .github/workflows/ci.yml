@@ -8,7 +8,7 @@ on:
 
 jobs:
   build:
-    runs-on: macos-latest
+    runs-on: ubuntu-latest
 
     env:
       JAVA_HOME: "/opt/hostedtoolcache/Java_Temurin-Hotspot_jdk/17.0.13-11/x64"
@@ -44,6 +44,14 @@ jobs:
           echo "${{ secrets.KEYSTORE_FILE_BASE64 }}" | base64 -d > app/arista-keystore.jks
           ls -la app/ # Vérification que le fichier a bien été généré
 
+
+      - name: Kill any running emulator
+        run: adb emu kill || true
+
+      - name: Emulator Debugging
+        run: |
+          adb logcat -d
+
       # Step 6 : Créer l'AVD et démarrer l'émulateur Android
       - name: Start Android Emulator
         uses: reactivecircus/android-emulator-runner@v2
@@ -59,7 +67,7 @@ jobs:
           emulator-options: -no-window -gpu swiftshader_indirect -no-snapshot -noaudio -no-boot-anim
           disable-animations: true
           disable-spellchecker: false
-          disable-linux-hw-accel: true
+          disable-linux-hw-accel: false
           enable-hw-keyboard: false
           channel: stable
 
