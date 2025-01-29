@@ -54,7 +54,7 @@ jobs:
       - name: Start Android Emulator
         uses: reactivecircus/android-emulator-runner@v2
         with:
-          api-level: 30
+          api-level: 34
           target: google_apis
           arch: x86_64
           force-avd-creation: true
@@ -68,26 +68,13 @@ jobs:
           disable-linux-hw-accel: true
           enable-hw-keyboard: false
           channel: stable
-          script: adb kill-server
-                  adb start-server
+          script: ./gradlew clean
 
-      # Step 7 : Attendre que l'émulateur soit prêt
-      - name: Wait for Emulator to be ready
-        run: |
-          adb wait-for-device
-          adb shell 'while [[ -z $(getprop sys.boot_completed) ]]; do sleep 1; done;'
-
-
-      # Step 8 : Vérifier la connexion ADB
-      - name: Check Emulator ADB Devices
-        run: |
-          adb devices
-          adb -s emulator-5556 shell getprop sys.boot_completed
 
       # Step 8 : Construire le projet en incluant la signature
-      - name: Clean and Build
+      - name:  Build
         run: |
-          ./gradlew clean assembleRelease
+          ./gradlew assembleRelease
         env:
           KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
           KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
