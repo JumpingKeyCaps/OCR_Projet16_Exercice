@@ -68,13 +68,7 @@ jobs:
           disable-linux-hw-accel: true
           enable-hw-keyboard: false
           channel: stable
-          script: ./gradlew clean
 
-        # Step 7 : Attendre que l'émulateur soit prêt
-      - name: Wait for Emulator to boot
-        run: |
-          adb -s emulator-5554 wait-for-device
-          adb shell getprop sys.boot_completed
 
       # Step 8 : Vérifier la connexion ADB
       - name: Check Emulator ADB Devices
