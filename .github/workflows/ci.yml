@@ -10,6 +10,12 @@ jobs:
   build:
     runs-on: ubuntu-latest
 
+    env:
+      JAVA_HOME: "/opt/hostedtoolcache/Java_Temurin-Hotspot_jdk/17.0.13-11/x64"
+      ANDROID_HOME: "/usr/local/lib/android/sdk"
+      ANDROID_SDK_ROOT: "/usr/local/lib/android/sdk"
+
+
     steps:
       # Step 1 : Checkout du code source
       - name: Checkout code
@@ -46,8 +52,17 @@ jobs:
           target: google_apis
           arch: x86_64
           force-avd-creation: true
-        env:
-          ANDROID_HOME: ${{ steps.setup-android.outputs.android-home }}
+          cores: 2
+          avd-name: test
+          emulator-boot-timeout: 600
+          emulator-port: 5554
+          emulator-options: -no-window -gpu swiftshader_indirect -no-snapshot -noaudio -no-boot-anim
+          disable-animations: true
+          disable-spellchecker: false
+          disable-linux-hw-accel: true  # Désactiver l'accélération matérielle
+          enable-hw-keyboard: false
+          channel: stable
+
 
       # Step 8 : Construire le projet en incluant la signature
       - name: Clean and Build
