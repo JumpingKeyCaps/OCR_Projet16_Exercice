@@ -68,12 +68,8 @@ jobs:
       - name: Start Emulator
         run: |
           nohup $ANDROID_HOME/emulator/emulator -avd test -no-window -gpu swiftshader_indirect -no-audio -no-boot-anim -accel off -no-metrics > /dev/null 2>&1 &
-          echo "Waiting for emulator to start..."
-          $ANDROID_HOME/platform-tools/adb wait-for-device
-          $ANDROID_HOME/platform-tools/adb shell settings put global window_animation_scale 0
-          $ANDROID_HOME/platform-tools/adb shell settings put global transition_animation_scale 0
-          $ANDROID_HOME/platform-tools/adb shell settings put global animator_duration_scale 0
-          $ANDROID_HOME/platform-tools/adb shell getprop init.svc.bootanim
+         
+          
 
         #   - name: Create AVD
         #       run: |
@@ -85,6 +81,7 @@ jobs:
       # Step  : Star emu and wait device
       - name:  wait for device
         run: |
+          echo "Waiting for emulator to start..."
           adb wait-for-device
           adb shell while [[ $(adb shell getprop sys.boot_completed) != 1 ]]; do sleep 1; done
           adb shell echo "Device is ready"
