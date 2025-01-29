@@ -50,11 +50,11 @@ jobs:
 
 
 
-      # Step 6 : Créer l'AVD et démarrer l'émulateur Android
+      # Step  : Créer l'AVD et démarrer l'émulateur Android
       - name: Start Android Emulator
         uses: reactivecircus/android-emulator-runner@v2
         with:
-          api-level: 31
+          api-level: 30
           target: google_apis
           arch: x86_64
           force-avd-creation: true
@@ -65,26 +65,28 @@ jobs:
           emulator-options: -no-window -gpu swiftshader_indirect -no-snapshot -noaudio -no-boot-anim -accel off -no-metrics
           disable-animations: true
           disable-spellchecker: true
-          disable-linux-hw-accel: false
+          disable-linux-hw-accel: true
           enable-hw-keyboard: false
           channel: stable
           script: ./gradlew clean
 
-
-      - name: Kill any running emulator
+      # Step  : Lancer l'emulateur
+      - name: Start emulator
         run: adb emu start
 
-      # Step 9 : Lancer les tests unitaires
-      - name: Test
+      # Step  : Lancer les tests unitaires
+      - name: Tests
         run: |
           ./gradlew test
 
-      # Step 10 : Générer le rapport Jacoco
-      - name: JacocoReport
+
+      # Step  : Générer le rapport Jacoco
+      - name: Generate JacocoReport
         run: |
           ./gradlew jacocoTestReport
 
-      # Step 11 : Analyse SonarCloud
+
+      # Step  : Analyse SonarCloud
       - name: Run SonarCloud Analysis
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
@@ -96,7 +98,8 @@ jobs:
             -Dsonar.coverage.jacoco.xmlReportPaths=app/build/reports/jacoco/jacocoTestReport/jacocoTestReport.xml
 
 
-      # Step 8 : Construire le projet en incluant la signature
+
+      # Step  : Construire le projet en incluant la signature
       - name:  Build
         run: |
           ./gradlew assembleRelease
@@ -106,8 +109,8 @@ jobs:
           KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
 
 
-      # Step 12 : Validation PR en cas d'échec
-      - name: Validate PR
+      # Step  : No Validation PR en cas d'échec
+      - name: Clearance PR
         if: ${{ failure() }}
         run: echo "Build ou analyse de qualité échouée, PR bloquée."
 
