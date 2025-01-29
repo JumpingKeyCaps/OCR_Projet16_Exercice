@@ -48,9 +48,7 @@ jobs:
       - name: Kill any running emulator
         run: adb emu kill || true
 
-      - name: Emulator Debugging
-        run: |
-          adb logcat -d
+
 
       # Step 6 : Créer l'AVD et démarrer l'émulateur Android
       - name: Start Android Emulator
@@ -75,6 +73,9 @@ jobs:
       - name: Check ADB connection
         run: adb devices
 
+      - name: Emulator Debugging
+        run: |
+          adb logcat -d
 
       # Step 8 : Construire le projet en incluant la signature
       - name: Clean and Build
