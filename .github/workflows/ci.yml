@@ -64,22 +64,15 @@ jobs:
 
       # Step  : Créer l'AVD et démarrer l'émulateur Android
       - name: Build Android virtual device (AVD/Emulator)
-        uses: reactivecircus/android-emulator-runner@v2
+        uses: actions/android-emulator-runner@v2
         with:
           api-level: 30
           target: google_apis
           arch: x86_64
           force-avd-creation: true
-          cores: 2
           avd-name: test
-          emulator-boot-timeout: 1200
-          emulator-port: 5554
           emulator-options: -no-window -gpu angle -no-snapshot -noaudio -no-boot-anim -accel off -no-metrics
           disable-animations: true
-          disable-spellchecker: true
-          disable-linux-hw-accel: true
-          enable-hw-keyboard: false
-          channel: stable
           script: ./gradlew clean
 
       # Step  : Star emu and wait device
@@ -96,7 +89,6 @@ jobs:
       # Step  : Lancer les tests instrumented
       - name: Run Instrumented Tests
         run: |
-          sleep 60  
           ./gradlew connectedDebugAndroidTest
 
       # Step  : Lancer les tests unitaires
