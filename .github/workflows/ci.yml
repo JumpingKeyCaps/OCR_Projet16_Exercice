@@ -62,10 +62,10 @@ jobs:
           avd-name: test
           emulator-boot-timeout: 1200
           emulator-port: 5554
-          emulator-options: -no-window -gpu swiftshader_indirect -no-snapshot -noaudio -no-boot-anim
+          emulator-options: -no-window -gpu off -no-snapshot -noaudio -no-boot-anim
           disable-animations: true
           disable-spellchecker: true
-          disable-linux-hw-accel: false
+          disable-linux-hw-accel: true
           enable-hw-keyboard: false
           channel: stable
           script: ./gradlew clean
