@@ -30,6 +30,12 @@ jobs:
       - name: Give execute permission to gradlew
         run: chmod +x ./gradlew
 
+      - name: Decode keystore file
+        run: |
+           echo "${{ secrets.KEYSTORE_FILE_BASE64 }}" | base64 -d > app/arista-keystore.jks
+           ls -la app/ 
+
+
       # Lancer les tests unitaires avant de builder l'APK
       - name: Run Unit Tests
         run: ./gradlew testDebugUnitTest
@@ -67,6 +73,9 @@ jobs:
         run: |
           echo "${{ secrets.KEYSTORE_FILE_BASE64 }}" | base64 -d > app/arista-keystore.jks
           ls -la app/ 
+          
+          
+          
 
       # Construire l'APK release
       - name: Build APK
