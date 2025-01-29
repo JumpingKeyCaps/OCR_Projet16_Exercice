@@ -68,6 +68,7 @@ jobs:
           disable-linux-hw-accel: false
           enable-hw-keyboard: false
           channel: stable
+          script: ./gradlew clean
 
       # check adb co
       - name: Check ADB connection
