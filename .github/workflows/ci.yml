@@ -56,7 +56,7 @@ jobs:
         with:
           api-level: 34
           target: google_apis
-          arch: x86_64
+          arch: arm64-v8a
           force-avd-creation: true
           cores: 2
           avd-name: test
@@ -70,10 +70,19 @@ jobs:
           channel: stable
           script: ./gradlew clean
 
-      # check adb co
-      - name: Check ADB connection
-        run: adb devices
+        # Step 7 : Attendre que l'émulateur soit prêt
+      - name: Wait for Emulator to boot
+        run: |
+          adb -s emulator-5554 wait-for-device
+          adb shell getprop sys.boot_completed
 
+      # Step 8 : Vérifier la connexion ADB
+      - name: Check Emulator ADB Devices
+        run: |
+          adb devices
+          adb -s emulator-5554 shell getprop sys.boot_completed
+
+      # Step 9 : Debugging de l'émulateur
       - name: Emulator Debugging
         run: |
           adb logcat -d
