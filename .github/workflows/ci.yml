@@ -60,25 +60,31 @@ jobs:
       - name: Delete existing AVD (if any)
         run: avdmanager delete avd -n test || true
 
+      - name: Create AVD
+        run: |
+          echo "y" | $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager --install "system-images;android-30;google_apis;x86_64"
+          echo "no" | $ANDROID_HOME/cmdline-tools/latest/bin/avdmanager create avd -n test -k "system-images;android-30;google_apis;x86_64" --device "pixel_4" || true
 
+      - name: Start Emulator
+        run: |
+          nohup $ANDROID_HOME/emulator/emulator -avd test -no-window -gpu swiftshader_indirect -no-audio -no-boot-anim -accel off -no-metrics > /dev/null 2>&1 &
+          echo "Waiting for emulator to start..."
+          $ANDROID_HOME/platform-tools/adb wait-for-device
+          $ANDROID_HOME/platform-tools/adb shell settings put global window_animation_scale 0
+          $ANDROID_HOME/platform-tools/adb shell settings put global transition_animation_scale 0
+          $ANDROID_HOME/platform-tools/adb shell settings put global animator_duration_scale 0
+          $ANDROID_HOME/platform-tools/adb shell getprop init.svc.bootanim
 
-      # Step  : Créer l'AVD et démarrer l'émulateur Android
-      - name: Build Android virtual device (AVD/Emulator)
-        uses: actions/android-emulator-runner@v2
-        with:
-          api-level: 30
-          target: google_apis
-          arch: x86_64
-          force-avd-creation: true
-          avd-name: test
-          emulator-options: -no-window -gpu angle -no-snapshot -noaudio -no-boot-anim -accel off -no-metrics
-          disable-animations: true
-          script: ./gradlew clean
+        #   - name: Create AVD
+        #       run: |
+        #      echo "no" | avdmanager create avd -n test -k "system-images;android-30;google_apis;x86_64"
+
+      #   - name: Start emulator
+      #      run: emulator -avd test -no-window -gpu angle &
 
       # Step  : Star emu and wait device
-      - name: Start emulator and wait for device
+      - name:  wait for device
         run: |
-          adb emu start &
           adb wait-for-device
           adb shell while [[ $(adb shell getprop sys.boot_completed) != 1 ]]; do sleep 1; done
           adb shell echo "Device is ready"
