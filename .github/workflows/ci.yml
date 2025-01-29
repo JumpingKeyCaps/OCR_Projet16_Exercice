@@ -73,7 +73,8 @@ jobs:
 
       - name: Create AVD
         run: |
-            echo "no" | avdmanager create avd -n test -k "system-images;android-30;google_apis;x86_64"
+            echo "y" | $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager --install "system-images;android-30;google_apis;x86_64"
+            echo "no" | $ANDROID_HOME/cmdline-tools/latest/bin/avdmanager create avd -n test -k "system-images;android-30;google_apis;x86_64" || true
 
       - name: Start emulator
         run: emulator -avd test -no-window -gpu angle &
