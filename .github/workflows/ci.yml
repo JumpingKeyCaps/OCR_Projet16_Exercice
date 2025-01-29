@@ -8,7 +8,7 @@ on:
 
 jobs:
   build:
-    runs-on: ubuntu-latest
+    runs-on: macos-latest
 
     env:
       JAVA_HOME: "/opt/hostedtoolcache/Java_Temurin-Hotspot_jdk/17.0.13-11/x64"
@@ -46,7 +46,7 @@ jobs:
 
       # Step 6 : Créer l'AVD et démarrer l'émulateur Android
       - name: Start Android Emulator
-        uses: reactivecircus/android-emulator-runner@v1
+        uses: reactivecircus/android-emulator-runner@v2
         with:
           api-level: 30
           target: google_apis
