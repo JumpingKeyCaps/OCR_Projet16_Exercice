@@ -44,6 +44,19 @@ jobs:
       - name: Generate Jacoco Report
         run: ./gradlew jacocoTestReport
 
+
+      - name: Run SonarCloud Analysis
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+        run: |
+          ./gradlew sonar \
+            -Dsonar.projectKey=JumpingKeyCaps_OCR_Projet16_Exercice \
+            -Dsonar.organization=jumpingkeycaps \
+            -Dsonar.host.url=https://sonarcloud.io \
+            -Dsonar.coverage.jacoco.xmlReportPaths=app/build/reports/jacoco/jacocoTestReport/jacocoTestReport.xml  
+        
+        
+
   build:
     needs: test  # Attendre que les tests passent avant de builder l'APK
     runs-on: ubuntu-latest
@@ -74,8 +87,6 @@ jobs:
           echo "${{ secrets.KEYSTORE_FILE_BASE64 }}" | base64 -d > app/arista-keystore.jks
           ls -la app/ 
           
-          
-          
 
       # Construire l'APK release
       - name: Build APK
@@ -85,15 +96,6 @@ jobs:
           KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
           KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
 
-      - name: Run SonarCloud Analysis
-        env:
-             SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-        run: |
-             ./gradlew sonarqube \
-               -Dsonar.projectKey=JumpingKeyCaps_OCR_Projet16_Exercice \
-               -Dsonar.organization=jumpingKeyCaps \
-               -Dsonar.host.url=https://sonarcloud.io \
-               -Dsonar.coverage.jacoco.xmlReportPaths=app/build/reports/jacoco/jacocoTestReport/jacocoTestReport.xml
 
       - name: Validate PR
         if: ${{ failure() }}
