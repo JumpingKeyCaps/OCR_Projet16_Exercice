@@ -46,7 +46,7 @@ jobs:
 
 
       - name: Kill any running emulator
-        run: adb emu start || true
+        run: adb emu kill || true
 
 
 
@@ -68,7 +68,8 @@ jobs:
           disable-linux-hw-accel: false
           enable-hw-keyboard: false
           channel: stable
-          script: ./gradlew clean
+          script: adb emu start
+
 
 
       # Step 8 : Construire le projet en incluant la signature
