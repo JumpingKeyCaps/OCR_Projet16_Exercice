@@ -54,14 +54,14 @@ jobs:
       - name: Start Android Emulator
         uses: reactivecircus/android-emulator-runner@v2
         with:
-          api-level: 34
+          api-level: 28
           target: google_apis
           arch: x86_64
           force-avd-creation: true
           cores: 2
           avd-name: test
           emulator-boot-timeout: 1200
-          emulator-port: 5556
+          emulator-port: 5554
           emulator-options: -no-window -gpu swiftshader_indirect -no-snapshot -noaudio -no-boot-anim -accel off
           disable-animations: true
           disable-spellchecker: true
