@@ -46,7 +46,7 @@ jobs:
 
 
       - name: Kill any running emulator
-        run: adb emu kill || true
+        run: adb emu start || true
 
 
 
@@ -54,7 +54,7 @@ jobs:
       - name: Start Android Emulator
         uses: reactivecircus/android-emulator-runner@v2
         with:
-          api-level: 28
+          api-level: 31
           target: google_apis
           arch: x86_64
           force-avd-creation: true
@@ -65,7 +65,7 @@ jobs:
           emulator-options: -no-window -gpu swiftshader_indirect -no-snapshot -noaudio -no-boot-anim -accel off -no-metrics
           disable-animations: true
           disable-spellchecker: true
-          disable-linux-hw-accel: true
+          disable-linux-hw-accel: false
           enable-hw-keyboard: false
           channel: stable
           script: ./gradlew clean
