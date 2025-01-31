@@ -13,6 +13,23 @@ plugins {
 }
 
 
+
+sonar {
+    properties {
+        property("sonar.projectKey", "JumpingKeyCaps_OCR_Projet16_Exercice")
+        property("sonar.organization", "jumpingkeycaps")
+        property("sonar.host.url", "https://sonarcloud.io")
+        property("sonar.token","b12d279ff57ed81c228340e4a64fa05af00425f7")
+        property("sonar.sources", "src/main")
+        property("sonar.tests", "src/test")
+        property("sonar.java.binaries", "${project.buildDir}/intermediates/classes/debug")
+        property("sonar.coverage.jacoco.xmlReportPaths", "${buildDir}/reports/jacoco/jacocoTestReport/jacocoTestReport.xml")
+    }
+}
+
+
+
+
 //Signature app
 val useGithubSecrets = System.getenv("CI") == "true" // Si on détecte un environnement CI
 
@@ -172,7 +189,7 @@ tasks.withType<Test> {
 val androidExtension = extensions.getByType<BaseExtension>()
 
 val jacocoTestReport by tasks.registering(JacocoReport::class) {
-    dependsOn("testDebugUnitTest","connectedDebugAndroidTest", "createDebugCoverageReport")
+    dependsOn("testDebugUnitTest","connectedDebugAndroidTest")
 
 
     group = "Reporting"
@@ -188,7 +205,7 @@ val jacocoTestReport by tasks.registering(JacocoReport::class) {
         "**/di/**",
         "**/hilt/**",
         "**/Hilt_*.*",
-        "**/com/openclassrooms/arista/ui/exercise/*$*.class",
+        "**/com/openclassrooms/arista/ui/exercise/**",
         "**/com/openclassrooms/arista/ui/sleep/*$*.class",
         "**/com/openclassrooms/arista/ui/user/*$*.class",
         "**/com/openclassrooms/arista/data/*$*.class",

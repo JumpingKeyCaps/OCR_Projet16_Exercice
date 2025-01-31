@@ -45,35 +45,18 @@ jobs:
           ls -la app/ # Vérification que le fichier a bien été généré
 
 
-      # kill emu if exist
-      - name: Kill any running emulator
+      - name: Setup and Start Emulator
+        shell: bash
         run: |
-          adb emu kill || true
-          for i in `seq 1 10`; do
-          if [[ $(adb devices | grep emulator) ]]; then
-           echo "Killing emulator..."
-           adb emu kill
-           sleep 2
-          fi
-          done
-      # Delete AVD if exist
-      - name: Delete existing AVD (if any)
-        run: avdmanager delete avd -n test || true
-
-
-
-      - name: Create AVD
-        run: |
-            echo "y" | $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager --install "system-images;android-30;google_apis;x86_64"
-            echo "no" | $ANDROID_HOME/cmdline-tools/latest/bin/avdmanager create avd -n test -k "system-images;android-30;google_apis;x86_64" || true
-
-
-      - name: Start Emulator
-        run: |
-          nohup $ANDROID_HOME/emulator/emulator -avd test -no-window -gpu swiftshader_indirect -no-audio -no-boot-anim -accel off -no-metrics > /dev/null 2>&1 &
+          $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager --update
+          echo "y" | $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager --install 'system-images;android-30;google_apis;x86'
+          echo "no" | $ANDROID_HOME/cmdline-tools/latest/bin/avdmanager create avd -n android_emulator -k 'system-images;android-30;google_apis;x86' --force
+          echo "Starting emulator"
+          nohup $ANDROID_HOME/emulator/emulator -avd android_emulator -no-snapshot > /dev/null 2>&1 & 
+          $ANDROID_HOME/platform-tools/adb wait-for-device shell 'while [[ -z $(getprop sys.boot_completed | tr -d '\''\r'\'') ]]; do sleep 1; done; input keyevent 82'
+          echo "Emulator started"
     
-
-
+      
 
       # Step  : Star emu and wait device
       - name:  wait for device
@@ -92,13 +75,13 @@ jobs:
           ./gradlew connectedDebugAndroidTest
 
       # Step  : Lancer les tests unitaires
-      - name: Tests
+      - name: Run Unit Tests
         run: |
           ./gradlew test
           
 
       # Step  : Générer le rapport Jacoco
-      - name: Generate JacocoReport
+      - name: Generate Jacoco Report
         run: |
           ./gradlew jacocoTestReport
 
@@ -117,7 +100,7 @@ jobs:
 
 
       # Step  : Construire le projet en incluant la signature
-      - name:  Build
+      - name:  Build release
         run: |
           ./gradlew assembleRelease
         env:
@@ -130,6 +113,9 @@ jobs:
       - name: Clearance PR
         if: ${{ failure() }}
         run: echo "Build ou analyse de qualité échouée, PR bloquée."
+
+
+
 
 
 
