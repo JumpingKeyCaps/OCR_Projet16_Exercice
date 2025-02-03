@@ -52,7 +52,7 @@ jobs:
           target: google_apis
           arch: x86_64
           api-level: 35
-          script: ./gradlew testDebugUnitTest  connectedDebugAndroidTest jacocoTestReport
+          script: ./gradlew testDebugUnitTest  connectedDebugAndroidTest
 
 
 
