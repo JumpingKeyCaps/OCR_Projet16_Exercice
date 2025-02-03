@@ -47,6 +47,8 @@ jobs:
 
       # Step  : Lancer les tests unitaire et instrumented
       - name: run tests
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
         uses: reactivecircus/android-emulator-runner@v2
         with:
           target: google_apis
@@ -60,30 +62,18 @@ jobs:
             adb shell input keyevent 82
             adb shell wm dismiss-keyguard
             echo "****************"
-            echo "@@@@@@@@@@@@@@@@  Running unit tests..."
-            ./gradlew testDebugUnitTest
-            echo "****************"
-            echo "@@@@@@@@@@@@@@@@  Running instrumented tests..."
-            ./gradlew connectedDebugAndroidTest
-            echo "****************"
             echo "@@@@@@@@@@@@@@@@   [Generating Jacoco report...]"
             ./gradlew jacocoReport --rerun-tasks --no-build-cache
-           
-
-        # Step  : Analyse SonarCloud
-      - name: Run SonarCloud Analysis
-        env:
-          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-        run: |
-         echo "**************** "
-         echo "**************** "
-         echo "**************** "
-         echo "@@@@@@@@@@@@@@@@   [SonarCloud Analysis...]"
-         ./gradlew sonar \
+            echo "**************** "
+            echo "**************** "
+            echo "**************** "
+            echo "@@@@@@@@@@@@@@@@   [SonarCloud Analysis...]"
+            ./gradlew sonar \
             -Dsonar.projectKey=JumpingKeyCaps_OCR_Projet16_Exercice \
             -Dsonar.organization=jumpingkeycaps \
             -Dsonar.host.url=https://sonarcloud.io \
             -Dsonar.coverage.jacoco.xmlReportPaths=app/build/reports/jacoco/jacocoTestReport/jacocoTestReport.xml
+
       
 
       # Step  : No Validation PR en cas d'échec
