@@ -70,7 +70,7 @@ jobs:
             ./gradlew lintDebug
             
             echo "@@@@@@@@@@@@@@@@  Running instrumented tests..."
-            ./gradlew connectedDebugAndroidTestCoverage
+            ./gradlew connectedDebugAndroidTest
             
             echo "@@@@@@@@@@@@@@@@  Running unit tests..."
             ./gradlew testDebugUnitTest
