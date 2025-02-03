@@ -69,7 +69,7 @@ jobs:
             ./gradlew testDebugUnitTest
             echo "****************"
             echo "@@@@@@@@@@@@@@@@   [Generating Jacoco report...]"
-            ./gradlew jacocoReport 
+            ./gradlew clean jacocoReport 
             echo "**************** "
             echo "**************** "
             echo "@@@@@@@@@@@@@@@@ Checking if Jacoco report exists..."
