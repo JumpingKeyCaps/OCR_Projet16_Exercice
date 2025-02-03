@@ -55,21 +55,36 @@ jobs:
           script: |
             echo "@@@@@@@@@@@@@@@@  Waiting for emulator to stabilize..."
             sleep 30
+            echo "****************"
             echo "@@@@@@@@@@@@@@@@  Unlocking emulator screen..."
             adb shell input keyevent 82
             adb shell wm dismiss-keyguard
-            echo "Running unit tests..."
+            echo "****************"
+            echo "@@@@@@@@@@@@@@@@  Running unit tests..."
             ./gradlew testDebugUnitTest
+            echo "****************"
             echo "@@@@@@@@@@@@@@@@  Running instrumented tests..."
             ./gradlew connectedDebugAndroidTest
             echo "****************"
             echo "@@@@@@@@@@@@@@@@   [Generating Jacoco report...]"
             ./gradlew jacocoReport --rerun-tasks --no-build-cache
-            echo "**************** "
-            echo "**************** "
-            echo "**************** "
-            echo "@@@@@@@@@@@@@@@@   [SonarCloud Analysis...]"
-            
+           
+
+        # Step  : Analyse SonarCloud
+      - name: Run SonarCloud Analysis
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+        run: |
+         echo "**************** "
+         echo "**************** "
+         echo "**************** "
+         echo "@@@@@@@@@@@@@@@@   [SonarCloud Analysis...]"
+         ./gradlew sonarqube \
+            -Dsonar.projectKey=JumpingKeyCaps_OCR_Projet16_Exercice \
+            -Dsonar.organization=jumpingKeyCaps \
+            -Dsonar.host.url=https://sonarcloud.io \
+            -Dsonar.coverage.jacoco.xmlReportPaths=app/build/reports/jacoco/jacocoTestReport/jacocoTestReport.xml
+      
 
       # Step  : No Validation PR en cas d'échec
       - name: Clearance PR
