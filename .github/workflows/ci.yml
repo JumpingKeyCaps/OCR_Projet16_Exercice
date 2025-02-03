@@ -62,11 +62,11 @@ jobs:
             adb shell input keyevent 82
             adb shell wm dismiss-keyguard
             echo "****************"
-            echo "@@@@@@@@@@@@@@@@  Running unit tests..."
-            ./gradlew testDebugUnitTest
-            echo "****************"
             echo "@@@@@@@@@@@@@@@@  Running instrumented tests..."
             ./gradlew connectedDebugAndroidTest
+            echo "****************"
+            echo "@@@@@@@@@@@@@@@@  Running unit tests..."
+            ./gradlew testDebugUnitTest
             echo "****************"
             echo "@@@@@@@@@@@@@@@@   [Generating Jacoco report...]"
             ./gradlew jacocoReport --rerun-tasks --no-build-cache
@@ -77,8 +77,7 @@ jobs:
             cat app/build/reports/jacoco/jacocoTestReport/jacocoTestReport.xml || echo " XXXXXXXXXXXXXX Jacoco report not found"
             echo "**************** "
             echo "@@@@@@@@@@@@@@@@   [SonarCloud Analysis...]"
-            ./gradlew sonarqube \
-              -Dsonar.projectKey=JumpingKeyCaps_OCR_Projet16_Exercice \
+            ./gradlew sonarqube -Dsonar.projectKey=JumpingKeyCaps_OCR_Projet16_Exercice \
               -Dsonar.organization=jumpingkeycaps \
               -Dsonar.host.url=https://sonarcloud.io \
               -Dsonar.coverage.jacoco.xmlReportPaths=app/build/reports/jacoco/jacocoTestReport/jacocoTestReport.xml --info
