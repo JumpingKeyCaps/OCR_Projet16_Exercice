@@ -53,22 +53,22 @@ jobs:
           arch: x86_64
           api-level: 35
           script: |
-            echo "Waiting for emulator to stabilize..."
-            sleep 20
-            echo "Unlocking emulator screen..."
+            echo "@@@@@@@@@@@@@@@@  Waiting for emulator to stabilize..."
+            sleep 30
+            echo "@@@@@@@@@@@@@@@@  Unlocking emulator screen..."
             adb shell input keyevent 82
             adb shell wm dismiss-keyguard
             echo "Running unit tests..."
             ./gradlew testDebugUnitTest
-            echo "Running instrumented tests..."
+            echo "@@@@@@@@@@@@@@@@  Running instrumented tests..."
             ./gradlew connectedDebugAndroidTest
             echo "****************"
-            echo "**************** [Generating Jacoco report...]"
+            echo "@@@@@@@@@@@@@@@@   [Generating Jacoco report...]"
             ./gradlew jacocoReport --rerun-tasks --no-build-cache
             echo "**************** "
             echo "**************** "
             echo "**************** "
-            echo "**************** [SonarCloud Analysis...]"
+            echo "@@@@@@@@@@@@@@@@   [SonarCloud Analysis...]"
             
 
       # Step  : No Validation PR en cas d'échec
