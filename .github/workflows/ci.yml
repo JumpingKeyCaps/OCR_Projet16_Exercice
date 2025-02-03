@@ -45,6 +45,10 @@ jobs:
           sudo udevadm trigger --name-match=kvm
       
 
+      # Step : Récupérer l'historique Git complet pour SonarCloud
+      - name: Fetch full Git history
+        run: git fetch --unshallow
+
       # Step  : Lancer les tests unitaire et instrumented
       - name: run tests
         env:
@@ -57,27 +61,29 @@ jobs:
           script: |
             echo "@@@@@@@@@@@@@@@@  Waiting for emulator to stabilize..."
             sleep 30
-            echo "****************"
+            
             echo "@@@@@@@@@@@@@@@@  Unlocking emulator screen..."
             adb shell input keyevent 82
             adb shell wm dismiss-keyguard
-            echo "****************"
+            
+            echo "@@@@@@@@@@@@@@@@   [Lint debug]"
+            ./gradlew lintDebug
+            
             echo "@@@@@@@@@@@@@@@@  Running instrumented tests..."
-            ./gradlew connectedDebugAndroidTest
-            echo "****************"
+            ./gradlew connectedDebugAndroidTestCoverage
+            
             echo "@@@@@@@@@@@@@@@@  Running unit tests..."
             ./gradlew testDebugUnitTest
-            echo "****************"
+            
             echo "@@@@@@@@@@@@@@@@   [Generating Jacoco report...]"
             ./gradlew clean jacocoReport 
-            echo "**************** "
-            echo "**************** "
+            
             echo "@@@@@@@@@@@@@@@@ Checking if Jacoco report exists..."
             ls app/build/reports/jacoco/jacocoTestReport
             cat app/build/reports/jacoco/jacocoTestReport/jacocoTestReport.xml || echo " XXXXXXXXXXXXXX Jacoco report not found"
-            echo "**************** "
+
             echo "@@@@@@@@@@@@@@@@   [SonarCloud Analysis...]"
-            ./gradlew sonar -Dsonar.projectKey=JumpingKeyCaps_OCR_Projet16_Exercice -Dsonar.organization=jumpingkeycaps -Dsonar.host.url=https://sonarcloud.io -Dsonar.coverage.jacoco.xmlReportPaths=build/reports/jacoco/jacocoTestReport/jacocoTestReport.xml
+            ./gradlew sonar -Dsonar.projectKey=JumpingKeyCaps_OCR_Projet16_Exercice -Dsonar.organization=jumpingkeycaps -Dsonar.host.url=https://sonarcloud.io -Dsonar.coverage.jacoco.xmlReportPaths=build/reports/jacoco/jacocoTestReport/jacocoTestReport.xml -Dsonar.androidLint.reportPaths=app/build/reports/lint-results-debug.xml
                
 
       
