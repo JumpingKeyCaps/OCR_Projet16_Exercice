@@ -76,6 +76,8 @@ jobs:
             ls app/build/reports/jacoco/jacocoTestReport
             cat app/build/reports/jacoco/jacocoTestReport/jacocoTestReport.xml || echo " XXXXXXXXXXXXXX Jacoco report not found"
             echo "**************** "
+            echo "Show all task available ... "
+            ./gradlew tasks --all
             echo "@@@@@@@@@@@@@@@@   [SonarCloud Analysis...]"
             ./gradlew sonar\
               -Dsonar.projectKey=JumpingKeyCaps_OCR_Projet16_Exercice \
