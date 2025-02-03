@@ -52,7 +52,18 @@ jobs:
           target: google_apis
           arch: x86_64
           api-level: 35
-          script: ./gradlew testDebugUnitTest  connectedDebugAndroidTest
+          script: |
+            echo "Waiting for emulator to stabilize..."
+            sleep 20
+            echo "Unlocking emulator screen..."
+            adb shell input keyevent 82
+            adb shell wm dismiss-keyguard
+            echo "Running unit tests..."
+            ./gradlew testDebugUnitTest
+            echo "Running instrumented tests..."
+            ./gradlew connectedDebugAndroidTest
+            echo "Generating Jacoco report..."
+            ./gradlew jacocoReport --rerun-tasks --no-build-cache
 
 
 
