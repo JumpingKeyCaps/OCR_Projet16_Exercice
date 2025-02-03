@@ -45,19 +45,19 @@ jobs:
           sudo udevadm trigger --name-match=kvm
       
 
-      # Step  : Lancer les tests unitaire
-      - name: run unit tests
+      # Step  : Lancer les tests unitaire et instrumented
+      - name: run tests
         uses: reactivecircus/android-emulator-runner@v2
         with:
           target: google_apis
           arch: x86_64
           api-level: 35
-          script: ./gradlew testDebugUnitTest
+          script:
+            ./gradlew testDebugUnitTest
+            ./gradlew connectedDebugAndroidTest
 
-      # Step  : Lancer les tests instrumented
-      - name: Run Instrumented Tests
-        run: |
-          ./gradlew connectedDebugAndroidTest
+
+
 
 
       # Step  : No Validation PR en cas d'échec
