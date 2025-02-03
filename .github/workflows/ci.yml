@@ -62,12 +62,24 @@ jobs:
             ./gradlew testDebugUnitTest
             echo "Running instrumented tests..."
             ./gradlew connectedDebugAndroidTest
-            echo "Generating Jacoco report..."
+            echo "****************"
+            echo "  ████   █████   █████   ████   █████   ████  "
+            echo "    ██  ██   ██  ██     ██  ██  ██     ██  ██ 
+            echo "    ██  ███████  ██     ██  ██  ██     ██  ██  "
+            echo " ██ ██  ██   ██  ██     ██  ██  ██     ██  ██  "
+            echo " █████  ██   ██  █████   ████   █████   ████  "
+            echo "**************** [Generating Jacoco report...]"
             ./gradlew jacocoReport --rerun-tasks --no-build-cache
-
-
-
-
+            echo "**************** "
+            echo "**************** "
+            echo "**************** "
+            echo "  ██████   ████   ██  █   ███   █████   "
+            echo "  ██      ██  ██  ██  █  ██ ██  ██ ██   "
+            echo "  ██████  ██  ██  █████  █████  █████   "
+            echo "      ██  ██  ██  ██ ██  ██ ██  ██ ███  "
+            echo "  ██████   ████   ██  █  ██ ██  ██  ██  "
+            echo "**************** [SonarCloud Analysis...]"
+            
 
       # Step  : No Validation PR en cas d'échec
       - name: Clearance PR
