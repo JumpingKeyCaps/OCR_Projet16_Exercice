@@ -62,27 +62,25 @@ jobs:
           arch: x86_64
           api-level: 35
           script: |
-            echo "@@@@@@@@@@@@@@@@  Waiting for emulator to stabilize..."
-            #to replace with adb wait-for-device
-            sleep 30 
+            echo "--- [Waiting for emulator to stabilize...]"
+            #sleep 30 
+            adb wait-for-device
             
-            echo "@@@@@@@@@@@@@@@@  Unlocking emulator screen..."
+            echo "--- [Unlocking emulator screen...]"
             adb shell input keyevent 82
             adb shell wm dismiss-keyguard
             
-            echo "@@@@@@@@@@@@@@@@   [Lint debug]"
+            echo "--- [Lint debug]"
             ./gradlew lintDebug
             
-           
-            
-            echo "@@@@@@@@@@@@@@@@   [Generating Jacoco report...]"
+            echo "--- [Generating Jacoco report...]"
             ./gradlew jacocoReport 
             
-            echo "@@@@@@@@@@@@@@@@ Checking if Jacoco report exists..."
+            echo "--- [Checking if Jacoco report exists...]"
             ls app/build/reports/jacoco/jacocoTestReport
             cat app/build/reports/jacoco/jacocoTestReport/jacocoTestReport.xml || echo " XXXXXXXXXXXXXX Jacoco report not found"
 
-            echo "@@@@@@@@@@@@@@@@   [SonarCloud Analysis...]"
+            echo "--- [SonarCloud Analysis...]"
             ./gradlew sonar -Dsonar.projectKey=JumpingKeyCaps_OCR_Projet16_Exercice -Dsonar.organization=jumpingkeycaps -Dsonar.host.url=https://sonarcloud.io -Dsonar.coverage.jacoco.xmlReportPaths=build/reports/jacoco/jacocoTestReport/jacocoTestReport.xml --info
                
     
