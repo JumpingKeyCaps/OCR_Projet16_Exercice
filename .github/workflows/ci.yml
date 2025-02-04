@@ -3,6 +3,9 @@ name: CI Pipeline
 on:
   pull_request:
     branches: [ "master"]
+  push:
+    tags:
+      - "*"  # Se déclenche sur la création d'un tag
 
 
 jobs:
@@ -60,7 +63,8 @@ jobs:
           api-level: 35
           script: |
             echo "@@@@@@@@@@@@@@@@  Waiting for emulator to stabilize..."
-            sleep 30
+            #to replace with adb wait-for-device
+            sleep 30 
             
             echo "@@@@@@@@@@@@@@@@  Unlocking emulator screen..."
             adb shell input keyevent 82
@@ -76,7 +80,7 @@ jobs:
             ./gradlew testDebugUnitTest
             
             echo "@@@@@@@@@@@@@@@@   [Generating Jacoco report...]"
-            ./gradlew clean jacocoReport 
+            ./gradlew jacocoReport 
             
             echo "@@@@@@@@@@@@@@@@ Checking if Jacoco report exists..."
             ls app/build/reports/jacoco/jacocoTestReport
@@ -85,16 +89,27 @@ jobs:
             echo "@@@@@@@@@@@@@@@@   [SonarCloud Analysis...]"
             ./gradlew sonar -Dsonar.projectKey=JumpingKeyCaps_OCR_Projet16_Exercice -Dsonar.organization=jumpingkeycaps -Dsonar.host.url=https://sonarcloud.io -Dsonar.coverage.jacoco.xmlReportPaths=build/reports/jacoco/jacocoTestReport/jacocoTestReport.xml --info
                
+    
 
-      
+      # Step  : Construire l'APK de release signé
+      - name: Build release APK
+        run: ./gradlew assembleRelease
+        env:
+          KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
+          KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
+          KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
+
+      # Step  : Sauvegarder l'APK généré
+      - name: Upload APK Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: release-apk
+          path: app/build/outputs/apk/release/app-release.apk
 
       # Step  : No Validation PR en cas d'échec
       - name: Clearance PR
         if: ${{ failure() }}
         run: echo "Build ou analyse de qualité échouée, PR bloquée."
-
-
-
 
 
 
