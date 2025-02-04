@@ -83,7 +83,7 @@ jobs:
             cat app/build/reports/jacoco/jacocoTestReport/jacocoTestReport.xml || echo " XXXXXXXXXXXXXX Jacoco report not found"
 
             echo "@@@@@@@@@@@@@@@@   [SonarCloud Analysis...]"
-            ./gradlew sonar -Dsonar.projectKey=JumpingKeyCaps_OCR_Projet16_Exercice -Dsonar.organization=jumpingkeycaps -Dsonar.host.url=https://sonarcloud.io -Dsonar.coverage.jacoco.xmlReportPaths=build/reports/jacoco/jacocoTestReport/jacocoTestReport.xml -Dsonar.androidLint.reportPaths=build/reports/lint-results-debug.xml --info
+            ./gradlew sonar -Dsonar.projectKey=JumpingKeyCaps_OCR_Projet16_Exercice -Dsonar.organization=jumpingkeycaps -Dsonar.host.url=https://sonarcloud.io -Dsonar.coverage.jacoco.xmlReportPaths=build/reports/jacoco/jacocoTestReport/jacocoTestReport.xml --info
                
 
       
