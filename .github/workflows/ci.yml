@@ -106,8 +106,6 @@ jobs:
         run: echo "Build ou analyse de qualité échouée, PR bloquée."
 
 
-
-
   # Step  : firebase deploy
   deploy:
     needs: build
