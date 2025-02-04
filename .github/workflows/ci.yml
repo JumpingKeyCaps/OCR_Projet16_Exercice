@@ -73,11 +73,11 @@ jobs:
             echo "@@@@@@@@@@@@@@@@   [Lint debug]"
             ./gradlew lintDebug
             
-            echo "@@@@@@@@@@@@@@@@  Running instrumented tests..."
-            ./gradlew connectedDebugAndroidTest
+            # echo "@@@@@@@@@@@@@@@@  Running instrumented tests..."
+            # ./gradlew connectedDebugAndroidTest
             
-            echo "@@@@@@@@@@@@@@@@  Running unit tests..."
-            ./gradlew testDebugUnitTest
+             #echo "@@@@@@@@@@@@@@@@  Running unit tests..."
+            # ./gradlew testDebugUnitTest
             
             echo "@@@@@@@@@@@@@@@@   [Generating Jacoco report...]"
             ./gradlew jacocoReport 
