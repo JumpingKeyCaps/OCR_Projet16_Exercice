@@ -2,51 +2,150 @@ name: CI Pipeline
 
 on:
   pull_request:
-    branches:
-      - master
+    branches: [ "master"]
+  push:
+    tags:
+      - "*"  # Se déclenche sur la création d'un tag
 
 
 jobs:
   build:
     runs-on: ubuntu-latest
 
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v3
 
+    steps:
+      # Step 1 : Checkout du code source
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      # Step 2 : Configuration de JDK 17
       - name: Setup JDK
-        uses: actions/setup-java@v3
+        uses: actions/setup-java@v4
         with:
           java-version: 17
           distribution: temurin
 
-      - name: Setup Android SDK
-        uses: android-actions/setup-android@v2
 
-      - name: Clean and Build
+      # Step 3 : Donner la permission execution au gradle wrapper
+      - name: Give execute permission to gradlew wrapper
+        run: chmod +x ./gradlew
+
+
+
+      # Step 4 : Reconstruire le fichier keystore à partir du secret
+      - name: Decode keystore file
         run: |
-          ./gradlew clean build
+          echo "${{ secrets.KEYSTORE_FILE_BASE64 }}" | base64 -d > app/arista-keystore.jks
+          ls -la app/ 
+          
 
-      - name: Test
+
+      #start emulator and run instrumented tests
+      - name: Enable KVM
         run: |
-          ./gradlew test
+          echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' | sudo tee /etc/udev/rules.d/99-kvm4all.rules
+          sudo udevadm control --reload-rules
+          sudo udevadm trigger --name-match=kvm
+      
 
-      - name: JacocoReport
-        run: |
-          ./gradlew jacocoTestReport
+      # Step : Récupérer l'historique Git complet pour SonarCloud
+      - name: Fetch full Git history
+        run: git fetch --unshallow
 
-      - name: Run SonarCloud Analysis
+      # Step  : Lancer les tests unitaire et instrumented + jacocoreport + sonar analyse
+      - name: Run Tests/generate Jacoco cover report and Sonar Quality Gate analyse
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-        run: |
-          ./gradlew sonarqube \
-            -Dsonar.projectKey=JumpingKeyCaps_OCR_Projet16_Exercice \
-            -Dsonar.organization=jumpingKeyCaps \
-            -Dsonar.host.url=https://sonarcloud.io \
-            -Dsonar.coverage.jacoco.xmlReportPaths=app/build/reports/jacoco/jacocoTestReport/jacocoTestReport.xml
+        uses: reactivecircus/android-emulator-runner@v2
+        with:
+          target: google_apis
+          arch: x86_64
+          api-level: 35
+          script: |
+            echo "--- [Waiting for emulator to stabilize...]"
+            #sleep 30 
+            adb wait-for-device
+            
+            echo "--- [Unlocking emulator screen...]"
+            adb shell input keyevent 82
+            adb shell wm dismiss-keyguard
+            
+            
+            echo "--- [Lint debug]"
+            ./gradlew lintDebug
+            
+            echo "--- [Generating Jacoco report...]"
+            ./gradlew jacocoReport 
+            
+            echo "--- [Checking if Jacoco report exists...]"
+            ls app/build/reports/jacoco/jacocoTestReport
+            cat app/build/reports/jacoco/jacocoTestReport/jacocoTestReport.xml || echo " [X] - Jacoco report not found"
 
-      - name: Validate PR
+            echo "--- [SonarCloud Analysis...]"
+            ./gradlew sonar -Dsonar.projectKey=JumpingKeyCaps_OCR_Projet16_Exercice -Dsonar.organization=jumpingkeycaps -Dsonar.host.url=https://sonarcloud.io -Dsonar.coverage.jacoco.xmlReportPaths=build/reports/jacoco/jacocoTestReport/jacocoTestReport.xml --info
+               
+    
+
+      # Step  : Construire l'APK de release signé
+      - name: Build release APK
+        run: ./gradlew assembleRelease
+        env:
+          KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
+          KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
+          KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
+
+      # Step  : Sauvegarder l'APK généré
+      - name: Upload APK Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: release-apk
+          path: app/build/outputs/apk/release/app-release.apk
+
+      # Step  : No Validation PR en cas d'échec
+      - name: Clearance PR
         if: ${{ failure() }}
         run: echo "Build ou analyse de qualité échouée, PR bloquée."
+
+  # Step  : firebase deploy
+  deploy:
+    needs: build
+    if: startsWith(github.ref, 'refs/tags/')
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Download APK Artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: release-apk
+          path: app/build/outputs/apk/release/
+
+      - name: Upload artifact to Firebase App Distribution
+        uses: wzieba/Firebase-Distribution-Github-Action@v1.5.1
+        with:
+          appId: ${{secrets.FIREBASE_APP_ID}}
+          token: ${{secrets.FIREBASE_TOKEN}}
+          #serviceCredentialsFileContent: ${{ secrets.CREDENTIAL_FILE_CONTENT }}
+          groups: testers
+          file: app/build/outputs/apk/release/app-release.apk
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 

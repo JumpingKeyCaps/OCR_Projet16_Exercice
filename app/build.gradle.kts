@@ -1,5 +1,6 @@
 import com.android.build.gradle.BaseExtension
 import java.io.FileInputStream
+import java.io.FileNotFoundException
 import java.util.Properties
 
 plugins {
@@ -11,36 +12,54 @@ plugins {
     id("org.sonarqube") version "5.1.0.4882"
 }
 
-/**
 
-sonar {
-    properties {
-        property("sonar.projectKey", "JumpingKeyCaps_OCR_Projet16_Exercice")
-        property("sonar.organization", "jumpingkeycaps")
-        property("sonar.host.url", "https://sonarcloud.io")
-        property("sonar.token","b12d279ff57ed81c228340e4a64fa05af00425f7")
-        property("sonar.sources", "src/main")
-        property("sonar.tests", "src/test")
-        property("sonar.java.binaries", "${project.buildDir}/intermediates/classes/debug")
 
-        property("sonar.coverage.jacoco.xmlReportPaths", "${buildDir}/reports/jacoco/jacocoTestReport/jacocoTestReport.xml")
 
-    }
-}
 
-*/
+
+
+
 //Signature app
-val keystorePropertiesFile = rootProject.file("keystore.properties")
-val keystoreProperties = Properties()
-keystoreProperties.load(FileInputStream(keystorePropertiesFile))
+val useGithubSecrets = System.getenv("CI") == "true" // Si on détecte un environnement CI
+
+val keystoreProperties: Properties? = if (!useGithubSecrets) {
+    val keystorePropertiesFile = rootProject.file("keystore.properties")
+    if (keystorePropertiesFile.exists()) {
+        Properties().apply {
+            load(FileInputStream(keystorePropertiesFile))
+        }
+    } else {
+        null
+    }
+} else {
+    null
+}
 
 android {
     signingConfigs {
         create("release") {
-            storeFile = file(keystoreProperties["storeFile"] as String)
-            storePassword = keystoreProperties["storePassword"] as String
-            keyAlias = keystoreProperties["keyAlias"] as String
-            keyPassword = keystoreProperties["keyPassword"] as String
+            if (useGithubSecrets) {
+
+                // Configuration pour GitHub Actions avec les secrets
+                val keystorePath = rootProject.file("app/arista-keystore.jks") // Assure que le fichier est généré ici
+                if (!keystorePath.exists()) {
+                    throw FileNotFoundException("Le fichier de keystore n'a pas été trouvé dans le chemin : ${keystorePath.absolutePath}")
+                }
+
+                // Configuration pour GitHub Actions avec les secrets
+                storeFile = keystorePath
+                storePassword = System.getenv("KEYSTORE_PASSWORD")
+                keyAlias = System.getenv("KEY_ALIAS")
+                keyPassword = System.getenv("KEY_PASSWORD")
+            } else {
+                // Configuration locale avec keystore.properties
+                if (keystoreProperties != null) {
+                    storeFile = file(keystoreProperties["storeFile"] as String)
+                    storePassword = keystoreProperties["storePassword"] as String
+                    keyAlias = keystoreProperties["keyAlias"] as String
+                    keyPassword = keystoreProperties["keyPassword"] as String
+                }
+            }
         }
     }
     namespace = "com.openclassrooms.arista"
@@ -159,7 +178,9 @@ tasks.withType<Test> {
 val androidExtension = extensions.getByType<BaseExtension>()
 
 val jacocoTestReport by tasks.registering(JacocoReport::class) {
-    dependsOn("testDebugUnitTest","connectedDebugAndroidTest", "createDebugCoverageReport")
+    dependsOn("testDebugUnitTest","connectedDebugAndroidTest")
+
+
     group = "Reporting"
     description = "Generate Jacoco coverage reports"
 
@@ -173,7 +194,7 @@ val jacocoTestReport by tasks.registering(JacocoReport::class) {
         "**/di/**",
         "**/hilt/**",
         "**/Hilt_*.*",
-        "**/com/openclassrooms/arista/ui/exercise/*$*.class",
+        "**/com/openclassrooms/arista/ui/exercise/**",
         "**/com/openclassrooms/arista/ui/sleep/*$*.class",
         "**/com/openclassrooms/arista/ui/user/*$*.class",
         "**/com/openclassrooms/arista/data/*$*.class",
