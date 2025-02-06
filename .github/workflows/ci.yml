@@ -126,7 +126,6 @@ jobs:
           appId: ${{secrets.FIREBASE_APP_ID}}
           token: ${{secrets.FIREBASE_TOKEN}}
           #serviceCredentialsFileContent: ${{ secrets.CREDENTIAL_FILE_CONTENT }}
-
           groups: testers
           file: app/build/outputs/apk/release/app-release.apk
 
