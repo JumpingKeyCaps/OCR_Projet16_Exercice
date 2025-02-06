@@ -7,11 +7,9 @@ on:
     tags:
       - "*"  # Se déclenche sur la création d'un tag
 
-
 jobs:
   build:
     runs-on: ubuntu-latest
-
 
     steps:
       # Step 1 : Checkout du code source
@@ -25,20 +23,15 @@ jobs:
           java-version: 17
           distribution: temurin
 
-
       # Step 3 : Donner la permission execution au gradle wrapper
       - name: Give execute permission to gradlew wrapper
         run: chmod +x ./gradlew
-
-
 
       # Step 4 : Reconstruire le fichier keystore à partir du secret
       - name: Decode keystore file
         run: |
           echo "${{ secrets.KEYSTORE_FILE_BASE64 }}" | base64 -d > app/arista-keystore.jks
           ls -la app/ 
-          
-
 
       #start emulator and run instrumented tests
       - name: Enable KVM
@@ -46,7 +39,6 @@ jobs:
           echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' | sudo tee /etc/udev/rules.d/99-kvm4all.rules
           sudo udevadm control --reload-rules
           sudo udevadm trigger --name-match=kvm
-      
 
       # Step : Récupérer l'historique Git complet pour SonarCloud
       - name: Fetch full Git history
@@ -69,7 +61,6 @@ jobs:
             echo "--- [Unlocking emulator screen...]"
             adb shell input keyevent 82
             adb shell wm dismiss-keyguard
-            
             
             echo "--- [Lint debug]"
             ./gradlew lintDebug
