@@ -67,7 +67,7 @@ jobs:
             ./gradlew lintDebug
             
             echo "--- [Generating Jacoco report...]"
-            ./gradlew jacocoReport --info
+            ./gradlew jacocoReport
             
             echo "--- [Checking if Jacoco report exists...]"
             ls app/build/reports/jacoco/jacocoTestReport
