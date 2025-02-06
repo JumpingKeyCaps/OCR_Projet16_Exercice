@@ -120,22 +120,3 @@ jobs:
           groups: testers
           file: app/build/outputs/apk/release/app-release.apk
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
