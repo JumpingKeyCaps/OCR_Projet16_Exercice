@@ -70,6 +70,7 @@ jobs:
             adb shell input keyevent 82
             adb shell wm dismiss-keyguard
             
+            
             echo "--- [Lint debug]"
             ./gradlew lintDebug
             
