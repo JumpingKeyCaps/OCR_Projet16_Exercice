@@ -8,6 +8,7 @@ on:
     tags:
       - "*"  # Se déclenche sur la création d'un tag
 
+
 jobs:
   build:
     runs-on: ubuntu-latest
